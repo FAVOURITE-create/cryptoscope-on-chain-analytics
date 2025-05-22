@@ -77,8 +77,8 @@
   )
 )
 
-(define-private (add-subscription-to-list (list (list 50 uint)) (subscription-id uint))
-  (unwrap-panic (as-max-len? (append list subscription-id) u50))
+(define-private (add-subscription-to-list (entries (list 50 uint)) (subscription-id uint))
+  (unwrap-panic (as-max-len? (append entries subscription-id) u50))
 )
 
 (define-private (is-subscription-active (subscription-id uint))
@@ -134,10 +134,6 @@
       (> (len (get subscription-ids subscription-list)) u0)
     false
   )
-)
-
-(define-read-only (get-subscription-price)
-  SUBSCRIPTION_FEE
 )
 
 (define-read-only (get-subscription-stats)
@@ -198,11 +194,6 @@
       { subscription-ids: (add-subscription-to-list (get subscription-ids user-subs) subscription-id) }
     )
     
-    ;; Update address monitoring list
-    (map-set address-monitoring
-      { address: monitored-address }
-      { subscription-ids: (add-subscription-to-list (get subscription-ids address-subs) subscription-id) }
-    )
     
     ;; Update metrics
     (update-subscription-metrics true false)
@@ -301,21 +292,5 @@
     (asserts! (is-contract-owner) ERR-UNAUTHORIZED)
     (try! (as-contract (stx-transfer? amount CONTRACT-OWNER recipient)))
     (ok amount)
-  )
-)
-
-(define-public (update-subscription-duration (new-duration uint))
-  (begin
-    (asserts! (is-contract-owner) ERR-UNAUTHORIZED)
-    (asserts! (> new-duration u0) ERR-INVALID-PARAMETERS)
-    (ok (var-set SUBSCRIPTION-DURATION new-duration))
-  )
-)
-
-(define-public (update-subscription-fee (new-fee uint))
-  (begin
-    (asserts! (is-contract-owner) ERR-UNAUTHORIZED)
-    (asserts! (> new-fee u0) ERR-INVALID-PARAMETERS)
-    (ok (var-set SUBSCRIPTION-FEE new-fee))
   )
 )
